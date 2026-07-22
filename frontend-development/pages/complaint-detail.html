@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Detail — CMMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:#f8f9fb; }
+        .sidebar { position:fixed; top:0; left:0; width:260px; height:100vh; background:linear-gradient(180deg,#112D4E 0%,#1a4a7a 100%); color:white; display:flex; flex-direction:column; z-index:100; }
+        .sidebar-brand { padding:25px 20px; border-bottom:1px solid rgba(255,255,255,0.1); }
+        .sidebar-brand h2 { font-size:22px; font-weight:700; }
+        .sidebar-brand h2 span { color:#be1744; }
+        .sidebar-brand p { font-size:11px; color:rgba(255,255,255,0.6); margin-top:3px; }
+        .sidebar-user { padding:20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:12px; }
+        .user-avatar { width:42px; height:42px; background:#be1744; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; }
+        .user-info h4 { font-size:13px; font-weight:600; }
+        .user-info p { font-size:11px; color:rgba(255,255,255,0.6); }
+        .sidebar-nav { flex:1; padding:20px 0; }
+        .nav-label { font-size:10px; letter-spacing:1.5px; color:rgba(255,255,255,0.4); padding:0 20px; margin-bottom:8px; margin-top:15px; text-transform:uppercase; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.75); text-decoration:none; font-size:14px; transition:0.3s; }
+        .nav-item:hover, .nav-item.active { background:rgba(190,23,68,0.2); color:white; border-left:3px solid #be1744; }
+        .nav-item i { width:20px; text-align:center; font-size:16px; }
+        .sidebar-footer { padding:20px; border-top:1px solid rgba(255,255,255,0.1); }
+        .logout-btn { display:flex; align-items:center; gap:10px; color:rgba(255,255,255,0.75); cursor:pointer; font-size:14px; background:none; border:none; font-family:'Poppins',sans-serif; transition:0.3s; width:100%; }
+        .logout-btn:hover { color:#be1744; }
+        .main-content { margin-left:260px; min-height:100vh; }
+        .topbar { background:white; padding:18px 30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size:20px; color:#112D4E; font-weight:600; }
+        .topbar p { font-size:13px; color:#777; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:#112D4E; text-decoration:none; font-size:13px; font-weight:500; padding:8px 16px; background:#f0f2f5; border-radius:7px; transition:0.3s; }
+        .back-btn:hover { background:#112D4E; color:white; }
+        .page-body { padding:30px; }
+        .content-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:20px; }
+        .card { background:white; border-radius:12px; padding:25px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:20px; }
+        .card h3 { font-size:16px; color:#112D4E; font-weight:600; margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+        .detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid #f5f5f5; }
+        .detail-row:last-child { border-bottom:none; }
+        .detail-label { font-size:12px; color:#999; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; width:35%; }
+        .detail-value { font-size:13px; color:#333; font-weight:500; text-align:right; width:63%; }
+        .badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+        .badge-submitted   { background:#e3f2fd; color:#1565c0; }
+        .badge-assigned    { background:#fff3e0; color:#e65100; }
+        .badge-in_progress { background:#f3e5f5; color:#6a1b9a; }
+        .badge-completed   { background:#e8f5e9; color:#2e7d32; }
+        .badge-closed      { background:#eceff1; color:#546e7a; }
+        .badge-low    { background:#e8f5e9; color:#2e7d32; }
+        .badge-medium { background:#fff3e0; color:#e65100; }
+        .badge-high   { background:#ffebee; color:#be1744; }
+        .badge-urgent { background:#be1744; color:white; }
+        .timeline { }
+        .timeline-item { display:flex; gap:15px; margin-bottom:20px; }
+        .timeline-dot { width:12px; height:12px; background:#be1744; border-radius:50%; margin-top:4px; flex-shrink:0; position:relative; }
+        .timeline-dot::after { content:''; position:absolute; top:12px; left:5px; width:2px; height:calc(100% + 15px); background:#e0e0e0; }
+        .timeline-item:last-child .timeline-dot::after { display:none; }
+        .timeline-content h4 { font-size:13px; color:#112D4E; font-weight:600; }
+        .timeline-content p { font-size:12px; color:#777; margin-top:2px; }
+        .feedback-btn { width:100%; padding:13px; background:#be1744; color:white; border:none; border-radius:8px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:0.3s; text-decoration:none; display:block; text-align:center; }
+        .feedback-btn:hover { background:#a01238; }
+        .assigned-worker { display:flex; align-items:center; gap:12px; padding:15px; background:#f8f9fb; border-radius:10px; }
+        .worker-av { width:45px; height:45px; background:linear-gradient(135deg,#112D4E,#be1744); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:16px; }
+        .worker-det h4 { font-size:14px; color:#112D4E; font-weight:600; }
+        .worker-det p { font-size:12px; color:#777; }
+        .empty-state { text-align:center; padding:30px; color:#999; }
+        .empty-state i { font-size:35px; margin-bottom:10px; display:block; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h2>CM<span>MS</span></h2>
+        <p>Complaint & Maintenance System</p>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar" id="avatarLetter">R</div>
+        <div class="user-info">
+            <h4 id="userName">Resident</h4>
+            <p>Resident</p>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Menu</div>
+        <a class="nav-item" href="resident-dashboard.html">
+            <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <a class="nav-item" href="submit-complaint.html">
+            <i class="fas fa-plus-circle"></i> Submit Complaint
+        </a>
+        <a class="nav-item active" href="my-complaints.html">
+            <i class="fas fa-clipboard-list"></i> My Complaints
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h1>Complaint Detail</h1>
+            <p>View your complaint status and history</p>
+        </div>
+        <a href="my-complaints.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="page-body">
+        <div class="content-grid">
+            <div>
+                <!-- Details -->
+                <div class="card">
+                    <h3><i class="fas fa-clipboard"></i> Complaint Details</h3>
+                    <div id="complaintDetails">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status History -->
+                <div class="card">
+                    <h3><i class="fas fa-history"></i> Status History</h3>
+                    <div class="timeline" id="statusTimeline">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading history...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <!-- Assigned Worker -->
+                <div class="card">
+                    <h3><i class="fas fa-hard-hat"></i> Assigned Worker</h3>
+                    <div id="workerSection">
+                        <div class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div class="card" id="feedbackSection" style="display:none;">
+                    <h3><i class="fas fa-star"></i> Rate This Work</h3>
+                    <p style="font-size:13px;color:#777;margin-bottom:15px;">
+                        Your complaint has been resolved. Rate the worker's performance.
+                    </p>
+                    <a href="" id="feedbackLink" class="feedback-btn">
+                        <i class="fas fa-star"></i> Submit Feedback
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+    const user = checkRole('RESIDENT');
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('avatarLetter').textContent =
+        user.fullName.charAt(0).toUpperCase();
+
+    const params = new URLSearchParams(window.location.search);
+    const complaintId = params.get('id');
+
+    async function loadComplaint() {
+        if (!complaintId) {
+            window.location.href = 'my-complaints.html';
+            return;
+        }
+
+        try {
+            const c = await getComplaint(complaintId);
+
+            // Details
+            document.getElementById('complaintDetails').innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">ID</span>
+                    <span class="detail-value">#${c.complaintId}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Title</span>
+                    <span class="detail-value">${c.title}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Description</span>
+                    <span class="detail-value">${c.description}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Category</span>
+                    <span class="detail-value">${c.category}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Priority</span>
+                    <span class="detail-value">
+                        <span class="badge badge-${c.priority.toLowerCase()}">
+                            ${c.priority}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value">
+                        <span class="badge badge-${c.status.toLowerCase()
+                            .replace('_','-')}">
+                            ${c.status.replace('_',' ')}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Location</span>
+                    <span class="detail-value">${c.location || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Submitted</span>
+                    <span class="detail-value">
+                        ${new Date(c.createdAt).toLocaleString()}
+                    </span>
+                </div>
+            `;
+
+            // Timeline
+            document.getElementById('statusTimeline').innerHTML = `
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h4>Complaint Submitted</h4>
+                        <p>${new Date(c.createdAt).toLocaleString()}</p>
+                    </div>
+                </div>
+                ${c.status !== 'SUBMITTED' ? `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>Worker Assigned</h4>
+                            <p>${new Date(c.updatedAt).toLocaleString()}</p>
+                        </div>
+                    </div>
+                ` : ''}
+                ${c.status === 'IN_PROGRESS' || c.status === 'COMPLETED'
+                    || c.status === 'CLOSED' ? `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>Work In Progress</h4>
+                            <p>${new Date(c.updatedAt).toLocaleString()}</p>
+                        </div>
+                    </div>
+                ` : ''}
+                ${c.status === 'COMPLETED' || c.status === 'CLOSED' ? `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>Complaint Resolved</h4>
+                            <p>${c.resolvedAt ?
+                                new Date(c.resolvedAt).toLocaleString() :
+                                'Completed'}</p>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            // Worker
+            if (c.assignedTo) {
+                document.getElementById('workerSection').innerHTML = `
+                    <div class="assigned-worker">
+                        <div class="worker-av">
+                            ${c.assignedTo.fullName.charAt(0)}
+                        </div>
+                        <div class="worker-det">
+                            <h4>${c.assignedTo.fullName}</h4>
+                            <p>${c.assignedTo.phoneNumber || 'Worker'}</p>
+                        </div>
+                    </div>`;
+            } else {
+                document.getElementById('workerSection').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clock"></i>
+                        <p>Waiting for worker assignment</p>
+                    </div>`;
+            }
+
+            // Show feedback button if completed
+            if (c.status === 'COMPLETED') {
+                const feedbackSection =
+                    document.getElementById('feedbackSection');
+                feedbackSection.style.display = 'block';
+                document.getElementById('feedbackLink').href =
+                    `submit-feedback.html?id=${c.complaintId}`;
+            }
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    loadComplaint();
+</script>
+
+</body>
+</html>

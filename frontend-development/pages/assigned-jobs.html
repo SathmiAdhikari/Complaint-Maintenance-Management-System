@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assigned Jobs — CMMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:#f8f9fb; }
+        .sidebar { position:fixed; top:0; left:0; width:260px; height:100vh; background:linear-gradient(180deg,#112D4E 0%,#1a4a7a 100%); color:white; display:flex; flex-direction:column; z-index:100; }
+        .sidebar-brand { padding:25px 20px; border-bottom:1px solid rgba(255,255,255,0.1); }
+        .sidebar-brand h2 { font-size:22px; font-weight:700; }
+        .sidebar-brand h2 span { color:#be1744; }
+        .sidebar-brand p { font-size:11px; color:rgba(255,255,255,0.6); margin-top:3px; }
+        .sidebar-user { padding:20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:12px; }
+        .user-avatar { width:42px; height:42px; background:#be1744; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; }
+        .user-info h4 { font-size:13px; font-weight:600; }
+        .user-info p { font-size:11px; color:rgba(255,255,255,0.6); }
+        .sidebar-nav { flex:1; padding:20px 0; }
+        .nav-label { font-size:10px; letter-spacing:1.5px; color:rgba(255,255,255,0.4); padding:0 20px; margin-bottom:8px; margin-top:15px; text-transform:uppercase; }
+        .nav-item { display:flex; align-items:center; gap:12px; padding:12px 20px; color:rgba(255,255,255,0.75); text-decoration:none; font-size:14px; transition:0.3s; }
+        .nav-item:hover, .nav-item.active { background:rgba(190,23,68,0.2); color:white; border-left:3px solid #be1744; }
+        .nav-item i { width:20px; text-align:center; font-size:16px; }
+        .sidebar-footer { padding:20px; border-top:1px solid rgba(255,255,255,0.1); }
+        .logout-btn { display:flex; align-items:center; gap:10px; color:rgba(255,255,255,0.75); cursor:pointer; font-size:14px; background:none; border:none; font-family:'Poppins',sans-serif; transition:0.3s; width:100%; }
+        .logout-btn:hover { color:#be1744; }
+        .main-content { margin-left:260px; min-height:100vh; }
+        .topbar { background:white; padding:18px 30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        .topbar h1 { font-size:20px; color:#112D4E; font-weight:600; }
+        .topbar p { font-size:13px; color:#777; }
+        .page-body { padding:30px; }
+
+        .filter-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .filter-tab { padding:8px 18px; border:1.5px solid #e0e0e0; border-radius:25px; font-size:12px; font-weight:500; cursor:pointer; transition:0.3s; background:white; color:#555; font-family:'Poppins',sans-serif; }
+        .filter-tab:hover { border-color:#be1744; color:#be1744; }
+        .filter-tab.active { background:#be1744; border-color:#be1744; color:white; }
+
+        .jobs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px; }
+
+        .job-card { background:white; border-radius:12px; padding:22px; box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:0.3s; }
+        .job-card:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.1); }
+
+        .job-card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+        .job-card-header h4 { font-size:14px; color:#112D4E; font-weight:600; flex:1; margin-right:10px; }
+
+        .job-card-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+        .meta-item { display:flex; align-items:center; gap:5px; font-size:11px; color:#777; }
+        .meta-item i { color:#be1744; }
+
+        .job-card-desc { font-size:12px; color:#666; line-height:1.6; margin-bottom:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+        .job-card-footer { display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f0f0f0; padding-top:12px; }
+
+        .view-btn { font-size:12px; color:#be1744; text-decoration:none; font-weight:600; }
+        .view-btn:hover { text-decoration:underline; }
+
+        .badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+        .badge-assigned    { background:#fff3e0; color:#e65100; }
+        .badge-in_progress { background:#f3e5f5; color:#6a1b9a; }
+        .badge-completed   { background:#e8f5e9; color:#2e7d32; }
+        .badge-closed      { background:#eceff1; color:#546e7a; }
+        .badge-low    { background:#e8f5e9; color:#2e7d32; }
+        .badge-medium { background:#fff3e0; color:#e65100; }
+        .badge-high   { background:#ffebee; color:#be1744; }
+        .badge-urgent { background:#be1744; color:white; }
+
+        .empty-state { text-align:center; padding:60px; color:#999; grid-column:1/-1; }
+        .empty-state i { font-size:50px; margin-bottom:15px; display:block; }
+        .empty-state p { font-size:14px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h2>CM<span>MS</span></h2>
+        <p>Complaint & Maintenance System</p>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar" id="avatarLetter">W</div>
+        <div class="user-info">
+            <h4 id="userName">Worker</h4>
+            <p>Maintenance Worker</p>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Menu</div>
+        <a class="nav-item" href="worker-dashboard.html">
+            <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <a class="nav-item active" href="assigned-jobs.html">
+            <i class="fas fa-clipboard-list"></i> Assigned Jobs
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h1>Assigned Jobs</h1>
+            <p>View and manage your maintenance jobs</p>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterJobs('ALL',this)">
+                All Jobs
+            </button>
+            <button class="filter-tab" onclick="filterJobs('ASSIGNED',this)">
+                Assigned
+            </button>
+            <button class="filter-tab" onclick="filterJobs('IN_PROGRESS',this)">
+                In Progress
+            </button>
+            <button class="filter-tab" onclick="filterJobs('COMPLETED',this)">
+                Completed
+            </button>
+        </div>
+
+        <div class="jobs-grid" id="jobsGrid">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading your jobs...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+    const user = checkRole('WORKER');
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('avatarLetter').textContent =
+        user.fullName.charAt(0).toUpperCase();
+
+    let allJobs = [];
+
+    async function loadJobs() {
+        allJobs = await getWorkerJobs(user.userId);
+        renderJobs(allJobs);
+    }
+
+    function renderJobs(jobs) {
+        const grid = document.getElementById('jobsGrid');
+
+        if (jobs.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-briefcase"></i>
+                    <p>No jobs found</p>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = jobs.map(j => `
+            <div class="job-card">
+                <div class="job-card-header">
+                    <h4>${j.title}</h4>
+                    <span class="badge badge-${j.status.toLowerCase()
+                        .replace('_','-')}">
+                        ${j.status.replace('_',' ')}
+                    </span>
+                </div>
+                <div class="job-card-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-tag"></i> ${j.category}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${j.location || 'No location'}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        ${new Date(j.createdAt).toLocaleDateString()}
+                    </span>
+                </div>
+                <p class="job-card-desc">${j.description}</p>
+                <div class="job-card-footer">
+                    <span class="badge badge-${j.priority.toLowerCase()}">
+                        ${j.priority}
+                    </span>
+                    <a class="view-btn"
+                        href="job-detail.html?id=${j.complaintId}">
+                        View & Update →
+                    </a>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterJobs(status, btn) {
+        document.querySelectorAll('.filter-tab')
+            .forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (status === 'ALL') {
+            renderJobs(allJobs);
+        } else {
+            renderJobs(allJobs.filter(j => j.status === status));
+        }
+    }
+
+    loadJobs();
+</script>
+
+</body>
+</html>

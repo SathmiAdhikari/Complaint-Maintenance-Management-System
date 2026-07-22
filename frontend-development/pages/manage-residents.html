@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Residents — CMMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:#f8f9fb; }
+
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            width: 260px; height: 100vh;
+            background: linear-gradient(180deg, #112D4E 0%, #1a4a7a 100%);
+            color: white; display: flex;
+            flex-direction: column; z-index: 100;
+        }
+        .sidebar-brand {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-brand h2 { font-size: 22px; font-weight: 700; }
+        .sidebar-brand h2 span { color: #be1744; }
+        .sidebar-brand p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+        .sidebar-user {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .user-avatar {
+            width: 42px; height: 42px; background: #be1744;
+            border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 700;
+        }
+        .user-info h4 { font-size: 13px; font-weight: 600; }
+        .user-info p { font-size: 11px; color: rgba(255,255,255,0.6); }
+        .sidebar-nav { flex: 1; padding: 20px 0; }
+        .nav-label {
+            font-size: 10px; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
+            padding: 0 20px; margin-bottom: 8px;
+            margin-top: 15px; text-transform: uppercase;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 20px; color: rgba(255,255,255,0.75);
+            text-decoration: none; font-size: 14px; transition: 0.3s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(190,23,68,0.2);
+            color: white; border-left: 3px solid #be1744;
+        }
+        .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .logout-btn {
+            display: flex; align-items: center; gap: 10px;
+            color: rgba(255,255,255,0.75); cursor: pointer;
+            font-size: 14px; background: none; border: none;
+            font-family: 'Poppins', sans-serif; transition: 0.3s; width: 100%;
+        }
+        .logout-btn:hover { color: #be1744; }
+
+        .main-content { margin-left: 260px; min-height: 100vh; }
+        .topbar {
+            background: white; padding: 18px 30px;
+            display: flex; justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .topbar h1 { font-size: 20px; color: #112D4E; font-weight: 600; }
+        .topbar p { font-size: 13px; color: #777; }
+        .page-body { padding: 30px; }
+
+        .mini-stats {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; margin-bottom: 20px;
+        }
+        .mini-stat {
+            background: white; border-radius: 10px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 15px;
+        }
+        .mini-stat-icon {
+            width: 45px; height: 45px; border-radius: 10px;
+            display: flex; align-items: center;
+            justify-content: center; font-size: 18px;
+        }
+        .mini-stat-icon.blue   { background:#e3f2fd; color:#1565c0; }
+        .mini-stat-icon.green  { background:#e8f5e9; color:#2e7d32; }
+        .mini-stat-icon.purple { background:#f3e5f5; color:#6a1b9a; }
+        .mini-stat h3 { font-size: 22px; font-weight: 700; color: #112D4E; }
+        .mini-stat p  { font-size: 12px; color: #777; }
+
+        .search-bar {
+            background: white; border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            display: flex; gap: 15px; align-items: center;
+        }
+        .search-input-wrapper {
+            position: relative; flex: 1;
+        }
+        .search-input-wrapper i {
+            position: absolute; left: 12px;
+            top: 50%; transform: translateY(-50%);
+            color: #999; font-size: 14px;
+        }
+        .search-input-wrapper input {
+            width: 100%; padding: 10px 12px 10px 36px;
+            border: 1.5px solid #e0e0e0; border-radius: 7px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px; outline: none;
+        }
+        .search-input-wrapper input:focus { border-color: #112D4E; }
+
+        .table-card {
+            background: white; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .table-header {
+            padding: 18px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between;
+            align-items: center;
+        }
+        .table-header h3 { font-size: 15px; color: #112D4E; font-weight: 600; }
+        .table-header span { font-size: 12px; color: #777; }
+
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        thead { background:#f8f9fb; }
+        th {
+            padding: 12px 15px; text-align: left;
+            color: #555; font-weight: 600; font-size: 12px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        td { padding:13px 15px; border-bottom:1px solid #f5f5f5; color:#444; }
+        tbody tr:hover { background:#fafafa; }
+
+        .resident-name {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .resident-avatar {
+            width: 35px; height: 35px;
+            background: linear-gradient(135deg, #112D4E, #be1744);
+            border-radius: 50%;
+            display: flex; align-items: center;
+            justify-content: center;
+            color: white; font-weight: 700;
+            font-size: 13px; flex-shrink: 0;
+        }
+
+        .badge {
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+        .badge-active   { background:#e8f5e9; color:#2e7d32; }
+        .badge-inactive { background:#ffebee; color:#be1744; }
+
+        .empty-state {
+            text-align: center; padding: 60px; color: #999;
+        }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; display: block; }
+        .empty-state p { font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h2>CM<span>MS</span></h2>
+        <p>Complaint & Maintenance System</p>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar" id="avatarLetter">A</div>
+        <div class="user-info">
+            <h4 id="userName">Admin</h4>
+            <p>Administrator</p>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main Menu</div>
+        <a class="nav-item" href="admin-dashboard.html">
+            <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <a class="nav-item" href="manage-complaints.html">
+            <i class="fas fa-clipboard-list"></i> Complaints
+        </a>
+        <a class="nav-item" href="manage-workers.html">
+            <i class="fas fa-hard-hat"></i> Workers
+        </a>
+        <a class="nav-item active" href="manage-residents.html">
+            <i class="fas fa-users"></i> Residents
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h1>Manage Residents</h1>
+            <p>View all registered residents</p>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Stats -->
+        <div class="mini-stats">
+            <div class="mini-stat">
+                <div class="mini-stat-icon blue">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 id="totalResidents">0</h3>
+                    <p>Total Residents</p>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon green">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <h3 id="activeResidents">0</h3>
+                    <p>Active</p>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon purple">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div>
+                    <h3 id="totalComplaints">0</h3>
+                    <p>Total Complaints</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput"
+                    placeholder="Search residents by name or email..."
+                    oninput="filterResidents()">
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3><i class="fas fa-users"></i> All Residents</h3>
+                <span id="residentCount">Loading...</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Resident</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Apartment</th>
+                        <th>Block</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody id="residentsTable">
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading residents...</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+    const user = checkRole('ADMIN');
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('avatarLetter').textContent =
+        user.fullName.charAt(0).toUpperCase();
+
+    let allResidents = [];
+
+    async function loadResidents() {
+        try {
+            const response = await fetch(
+                'http://localhost:8080/api/residents/all');
+            allResidents = await response.json();
+
+            document.getElementById('totalResidents').textContent =
+                allResidents.length;
+            document.getElementById('activeResidents').textContent =
+                allResidents.filter(r => r.active).length;
+
+            // Load complaints count
+            const complaints = await getAllComplaints();
+            document.getElementById('totalComplaints').textContent =
+                complaints.length;
+
+            renderTable(allResidents);
+        } catch (err) {
+            document.getElementById('residentsTable').innerHTML = `
+                <tr><td colspan="8">
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Error loading residents</p>
+                    </div>
+                </td></tr>`;
+        }
+    }
+
+    function renderTable(residents) {
+        const tbody = document.getElementById('residentsTable');
+        document.getElementById('residentCount').textContent =
+            `${residents.length} residents found`;
+
+        if (residents.length === 0) {
+            tbody.innerHTML = `
+                <tr><td colspan="8">
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No residents found</p>
+                    </div>
+                </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = residents.map((r, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>
+                    <div class="resident-name">
+                        <div class="resident-avatar">
+                            ${r.fullName.charAt(0)}
+                        </div>
+                        <span>${r.fullName}</span>
+                    </div>
+                </td>
+                <td>${r.email}</td>
+                <td>${r.phoneNumber || '-'}</td>
+                <td>${r.apartmentNumber || '-'}</td>
+                <td>${r.block || '-'}</td>
+                <td>
+                    <span class="badge ${r.active ?
+                        'badge-active' : 'badge-inactive'}">
+                        ${r.active ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td>${new Date(r.createdAt).toLocaleDateString()}</td>
+            </tr>
+        `).join('');
+    }
+
+    function filterResidents() {
+        const search = document.getElementById('searchInput')
+            .value.toLowerCase();
+        const filtered = allResidents.filter(r =>
+            r.fullName.toLowerCase().includes(search) ||
+            r.email.toLowerCase().includes(search)
+        );
+        renderTable(filtered);
+    }
+
+    loadResidents();
+</script>
+
+</body>
+</html>
