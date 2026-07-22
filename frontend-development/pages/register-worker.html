@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register as Worker — CMMS</title>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fb;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .left-panel {
+            width: 40%;
+            background: linear-gradient(135deg, #112D4E 0%, #1a4a7a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 350px; height: 350px;
+            background: rgba(190,23,68,0.15);
+            border-radius: 50%;
+            bottom: -100px; left: -100px;
+        }
+
+        .left-panel .brand { text-align: center; z-index: 1; }
+        .left-panel .brand i {
+            font-size: 60px;
+            color: #be1744;
+            margin-bottom: 20px;
+        }
+        .left-panel .brand h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .left-panel .brand h1 span { color: #be1744; }
+        .left-panel .brand p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.7;
+        }
+
+        .trade-list {
+            margin-top: 40px;
+            z-index: 1;
+            width: 100%;
+        }
+
+        .trade-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+        }
+
+        .trade-item:hover {
+            background: rgba(190,23,68,0.2);
+        }
+
+        .trade-item i {
+            font-size: 22px;
+            color: #be1744;
+            width: 30px;
+            text-align: center;
+        }
+
+        .trade-item span {
+            font-size: 14px;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .right-panel {
+            width: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .register-box {
+            width: 100%;
+            max-width: 520px;
+            padding: 20px 0;
+        }
+
+        .register-box h2 {
+            font-size: 26px;
+            color: #112D4E;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .register-box p {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #be1744;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            margin-top: 25px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #112D4E;
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 13px;
+        }
+
+        .input-wrapper input,
+        .input-wrapper select,
+        .input-wrapper textarea {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 7px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border 0.3s;
+            background: #fafafa;
+        }
+
+        .input-wrapper select {
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .input-wrapper textarea {
+            padding-top: 10px;
+            height: 90px;
+            resize: none;
+        }
+
+        .input-wrapper input:focus,
+        .input-wrapper select:focus,
+        .input-wrapper textarea:focus {
+            border-color: #112D4E;
+            background: white;
+        }
+
+        .pending-notice {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 12px;
+            color: #f57f17;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 13px;
+            background: #be1744;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        .register-btn:hover {
+            background: #a01238;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 11px 15px;
+            border-radius: 7px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #777;
+        }
+
+        .login-link a {
+            color: #be1744;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .left-panel { display: none; }
+            .right-panel { width: 100%; padding: 25px 20px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="left-panel">
+    <div class="brand">
+        <i class="fas fa-hard-hat"></i>
+        <h1>Worker<span> Portal</span></h1>
+        <p>Join our network of skilled maintenance professionals and start receiving jobs today.</p>
+    </div>
+    <div class="trade-list">
+        <div class="trade-item">
+            <i class="fas fa-tint"></i>
+            <span>Plumber</span>
+        </div>
+        <div class="trade-item">
+            <i class="fas fa-bolt"></i>
+            <span>Electrician</span>
+        </div>
+        <div class="trade-item">
+            <i class="fas fa-hammer"></i>
+            <span>Carpenter</span>
+        </div>
+        <div class="trade-item">
+            <i class="fas fa-broom"></i>
+            <span>Cleaner</span>
+        </div>
+        <div class="trade-item">
+            <i class="fas fa-wrench"></i>
+            <span>Other Trades</span>
+        </div>
+    </div>
+</div>
+
+<div class="right-panel">
+    <div class="register-box">
+        <h2>Create Worker Account</h2>
+        <p>Register your professional profile to start receiving maintenance jobs</p>
+
+        <div class="pending-notice">
+            <i class="fas fa-info-circle"></i>
+            Your account will be reviewed and approved by admin before you can log in.
+        </div>
+
+        <div class="alert alert-error" id="errorAlert"></div>
+        <div class="alert alert-success" id="successAlert"></div>
+
+        <div class="section-label">Personal Information</div>
+
+        <div class="form-group">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user"></i>
+                <input type="text" id="fullName" placeholder="Enter your full name">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Email Address</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-phone"></i>
+                    <input type="text" id="phoneNumber" placeholder="07XXXXXXXX">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Create a strong password">
+            </div>
+        </div>
+
+        <div class="section-label">Professional Details</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Trade / Skill</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-tools"></i>
+                    <select id="trade">
+                        <option value="">Select your trade</option>
+                        <option value="PLUMBER">Plumber</option>
+                        <option value="ELECTRICIAN">Electrician</option>
+                        <option value="CARPENTER">Carpenter</option>
+                        <option value="CLEANER">Cleaner</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Years of Experience</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-briefcase"></i>
+                    <input type="number" id="experienceYears"
+                        placeholder="e.g. 5" min="0" max="50">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Bio / About You</label>
+            <div class="input-wrapper">
+                <i class="fas fa-comment"></i>
+                <textarea id="bio"
+                    placeholder="Briefly describe your skills and experience..."></textarea>
+            </div>
+        </div>
+
+        <button class="register-btn" onclick="handleRegister()">
+            <i class="fas fa-paper-plane"></i> Submit Application
+        </button>
+
+        <div class="login-link">
+            Already have an account?
+            <a href="login.html">Sign in here</a>
+        </div>
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+    async function handleRegister() {
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const trade = document.getElementById('trade').value;
+        const experienceYears = document.getElementById('experienceYears').value;
+        const bio = document.getElementById('bio').value.trim();
+
+        if (!fullName || !email || !phoneNumber ||
+            !password || !trade || !experienceYears) {
+            showError('Please fill in all required fields.');
+            return;
+        }
+
+        const btn = document.querySelector('.register-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        btn.disabled = true;
+
+        const result = await registerWorker({
+            fullName, email, password,
+            phoneNumber, trade, experienceYears, bio
+        });
+
+        if (result.error) {
+            showError(result.error);
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Application';
+            btn.disabled = false;
+            return;
+        }
+
+        showSuccess(
+            'Application submitted! Please wait for admin approval before logging in.'
+        );
+
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 3000);
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('errorAlert');
+        el.textContent = msg;
+        el.style.display = 'block';
+        document.getElementById('successAlert').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+        const el = document.getElementById('successAlert');
+        el.textContent = msg;
+        el.style.display = 'block';
+        document.getElementById('errorAlert').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

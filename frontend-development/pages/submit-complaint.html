@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Complaint — CMMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:#f8f9fb; }
+
+        .sidebar {
+            position:fixed; top:0; left:0;
+            width:260px; height:100vh;
+            background:linear-gradient(180deg,#112D4E 0%,#1a4a7a 100%);
+            color:white; display:flex;
+            flex-direction:column; z-index:100;
+        }
+        .sidebar-brand {
+            padding:25px 20px;
+            border-bottom:1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-brand h2 { font-size:22px; font-weight:700; }
+        .sidebar-brand h2 span { color:#be1744; }
+        .sidebar-brand p { font-size:11px; color:rgba(255,255,255,0.6); margin-top:3px; }
+        .sidebar-user {
+            padding:20px;
+            border-bottom:1px solid rgba(255,255,255,0.1);
+            display:flex; align-items:center; gap:12px;
+        }
+        .user-avatar {
+            width:42px; height:42px; background:#be1744;
+            border-radius:50%; display:flex;
+            align-items:center; justify-content:center;
+            font-size:18px; font-weight:700;
+        }
+        .user-info h4 { font-size:13px; font-weight:600; }
+        .user-info p { font-size:11px; color:rgba(255,255,255,0.6); }
+        .sidebar-nav { flex:1; padding:20px 0; }
+        .nav-label {
+            font-size:10px; letter-spacing:1.5px;
+            color:rgba(255,255,255,0.4);
+            padding:0 20px; margin-bottom:8px;
+            margin-top:15px; text-transform:uppercase;
+        }
+        .nav-item {
+            display:flex; align-items:center; gap:12px;
+            padding:12px 20px; color:rgba(255,255,255,0.75);
+            text-decoration:none; font-size:14px; transition:0.3s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background:rgba(190,23,68,0.2);
+            color:white; border-left:3px solid #be1744;
+        }
+        .nav-item i { width:20px; text-align:center; font-size:16px; }
+        .sidebar-footer {
+            padding:20px;
+            border-top:1px solid rgba(255,255,255,0.1);
+        }
+        .logout-btn {
+            display:flex; align-items:center; gap:10px;
+            color:rgba(255,255,255,0.75); cursor:pointer;
+            font-size:14px; background:none; border:none;
+            font-family:'Poppins',sans-serif; transition:0.3s; width:100%;
+        }
+        .logout-btn:hover { color:#be1744; }
+
+        .main-content { margin-left:260px; min-height:100vh; }
+        .topbar {
+            background:white; padding:18px 30px;
+            display:flex; justify-content:space-between;
+            align-items:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);
+        }
+        .topbar h1 { font-size:20px; color:#112D4E; font-weight:600; }
+        .topbar p { font-size:13px; color:#777; }
+        .back-btn {
+            display:flex; align-items:center; gap:8px;
+            color:#112D4E; text-decoration:none;
+            font-size:13px; font-weight:500;
+            padding:8px 16px; background:#f0f2f5;
+            border-radius:7px; transition:0.3s;
+        }
+        .back-btn:hover { background:#112D4E; color:white; }
+
+        .page-body { padding:30px; }
+
+        .form-container {
+            display:grid; grid-template-columns:2fr 1fr; gap:20px;
+        }
+
+        .card {
+            background:white; border-radius:12px;
+            padding:25px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.06);
+        }
+        .card h3 {
+            font-size:16px; color:#112D4E;
+            font-weight:600; margin-bottom:20px;
+            display:flex; align-items:center; gap:8px;
+        }
+
+        .form-group { margin-bottom:18px; }
+        .form-group label {
+            display:block; font-size:12px;
+            font-weight:600; color:#112D4E;
+            margin-bottom:6px;
+        }
+        .input-wrapper { position:relative; }
+        .input-wrapper i {
+            position:absolute; left:12px;
+            top:50%; transform:translateY(-50%);
+            color:#999; font-size:13px;
+        }
+        .input-wrapper input,
+        .input-wrapper select,
+        .input-wrapper textarea {
+            width:100%; padding:10px 12px 10px 36px;
+            border:1.5px solid #e0e0e0; border-radius:7px;
+            font-family:'Poppins',sans-serif;
+            font-size:13px; outline:none; transition:0.3s;
+            background:#fafafa;
+        }
+        .input-wrapper textarea {
+            padding-top:10px; height:120px; resize:none;
+        }
+        .input-wrapper input:focus,
+        .input-wrapper select:focus,
+        .input-wrapper textarea:focus {
+            border-color:#112D4E; background:white;
+        }
+
+        /* Category Cards */
+        .category-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:10px; margin-bottom:18px;
+        }
+        .category-card {
+            padding:15px 10px; border:1.5px solid #e0e0e0;
+            border-radius:10px; text-align:center;
+            cursor:pointer; transition:0.3s;
+        }
+        .category-card:hover { border-color:#be1744; background:#fff5f7; }
+        .category-card.selected { border-color:#be1744; background:#fff5f7; }
+        .category-card i { font-size:22px; color:#be1744; margin-bottom:6px; display:block; }
+        .category-card span { font-size:11px; color:#333; font-weight:500; }
+
+        /* Priority */
+        .priority-grid {
+            display:grid; grid-template-columns:repeat(2,1fr);
+            gap:10px; margin-bottom:18px;
+        }
+        .priority-card {
+            padding:12px; border:1.5px solid #e0e0e0;
+            border-radius:8px; cursor:pointer; transition:0.3s;
+            display:flex; align-items:center; gap:8px;
+        }
+        .priority-card:hover { border-color:#be1744; }
+        .priority-card.selected { border-color:#be1744; background:#fff5f7; }
+        .priority-card i { font-size:16px; }
+        .priority-card span { font-size:12px; font-weight:600; }
+        .priority-card.low    i { color:#2e7d32; }
+        .priority-card.medium i { color:#e65100; }
+        .priority-card.high   i { color:#be1744; }
+        .priority-card.urgent i { color:#b71c1c; }
+
+        .submit-btn {
+            width:100%; padding:13px;
+            background:#be1744; color:white;
+            border:none; border-radius:8px;
+            font-family:'Poppins',sans-serif;
+            font-size:15px; font-weight:600;
+            cursor:pointer; transition:0.3s; margin-top:10px;
+        }
+        .submit-btn:hover { background:#a01238; transform:translateY(-2px); }
+
+        .alert {
+            padding:12px 15px; border-radius:8px;
+            font-size:13px; margin-bottom:15px; display:none;
+        }
+        .alert-success { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+        .alert-error   { background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
+
+        /* Tips */
+        .tip-item {
+            display:flex; align-items:flex-start;
+            gap:12px; margin-bottom:15px;
+        }
+        .tip-item i {
+            color:#be1744; font-size:16px;
+            margin-top:2px; flex-shrink:0;
+        }
+        .tip-item p { font-size:13px; color:#555; line-height:1.6; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h2>CM<span>MS</span></h2>
+        <p>Complaint & Maintenance System</p>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar" id="avatarLetter">R</div>
+        <div class="user-info">
+            <h4 id="userName">Resident</h4>
+            <p>Resident</p>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Menu</div>
+        <a class="nav-item" href="resident-dashboard.html">
+            <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <a class="nav-item active" href="submit-complaint.html">
+            <i class="fas fa-plus-circle"></i> Submit Complaint
+        </a>
+        <a class="nav-item" href="my-complaints.html">
+            <i class="fas fa-clipboard-list"></i> My Complaints
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h1>Submit Complaint</h1>
+            <p>Report a maintenance issue in your apartment</p>
+        </div>
+        <a href="resident-dashboard.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <div class="page-body">
+        <div class="form-container">
+
+            <!-- Form -->
+            <div class="card">
+                <h3><i class="fas fa-edit"></i> Complaint Details</h3>
+
+                <div class="alert alert-success" id="successAlert"></div>
+                <div class="alert alert-error" id="errorAlert"></div>
+
+                <div class="form-group">
+                    <label>Complaint Title</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-heading"></i>
+                        <input type="text" id="title"
+                            placeholder="e.g. Leaking pipe in bathroom">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-align-left"></i>
+                        <textarea id="description"
+                            placeholder="Describe the issue in detail..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <div class="category-grid">
+                        <div class="category-card" onclick="selectCategory('PLUMBING',this)">
+                            <i class="fas fa-tint"></i>
+                            <span>Plumbing</span>
+                        </div>
+                        <div class="category-card" onclick="selectCategory('ELECTRICAL',this)">
+                            <i class="fas fa-bolt"></i>
+                            <span>Electrical</span>
+                        </div>
+                        <div class="category-card" onclick="selectCategory('STRUCTURAL',this)">
+                            <i class="fas fa-home"></i>
+                            <span>Structural</span>
+                        </div>
+                        <div class="category-card" onclick="selectCategory('CLEANING',this)">
+                            <i class="fas fa-broom"></i>
+                            <span>Cleaning</span>
+                        </div>
+                        <div class="category-card" onclick="selectCategory('OTHER',this)">
+                            <i class="fas fa-wrench"></i>
+                            <span>Other</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority</label>
+                    <div class="priority-grid">
+                        <div class="priority-card low" onclick="selectPriority('LOW',this)">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>Low</span>
+                        </div>
+                        <div class="priority-card medium" onclick="selectPriority('MEDIUM',this)">
+                            <i class="fas fa-minus"></i>
+                            <span>Medium</span>
+                        </div>
+                        <div class="priority-card high" onclick="selectPriority('HIGH',this)">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>High</span>
+                        </div>
+                        <div class="priority-card urgent" onclick="selectPriority('URGENT',this)">
+                            <i class="fas fa-exclamation"></i>
+                            <span>Urgent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Location</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="location"
+                            placeholder="e.g. Block A, Room 204, Bathroom">
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="handleSubmit()">
+                    <i class="fas fa-paper-plane"></i> Submit Complaint
+                </button>
+            </div>
+
+            <!-- Tips -->
+            <div class="card">
+                <h3><i class="fas fa-lightbulb"></i> Tips</h3>
+                <div class="tip-item">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Be specific about the location so workers can find it easily.</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Describe the problem in detail — when it started, how severe it is.</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Choose the correct category so the right worker is assigned.</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Only mark URGENT if it is a safety risk or causing major damage.</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-check-circle"></i>
+                    <p>After submitting, track your complaint status from the dashboard.</p>
+                </div>
+
+                <div style="background:#f8f9fb;border-radius:10px;padding:18px;margin-top:20px;">
+                    <h4 style="font-size:13px;color:#112D4E;margin-bottom:10px;">
+                        <i class="fas fa-info-circle" style="color:#be1744;"></i>
+                        What happens next?
+                    </h4>
+                    <p style="font-size:12px;color:#555;line-height:1.8;">
+                        1. Your complaint is submitted<br>
+                        2. Admin reviews and assigns a worker<br>
+                        3. Worker starts working on your issue<br>
+                        4. You get notified when it's resolved<br>
+                        5. You rate the worker's performance
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+    const user = checkRole('RESIDENT');
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('avatarLetter').textContent =
+        user.fullName.charAt(0).toUpperCase();
+
+    let selectedCategory = '';
+    let selectedPriority = '';
+
+    function selectCategory(cat, el) {
+        document.querySelectorAll('.category-card')
+            .forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedCategory = cat;
+    }
+
+    function selectPriority(pri, el) {
+        document.querySelectorAll('.priority-card')
+            .forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedPriority = pri;
+    }
+
+    async function handleSubmit() {
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const location = document.getElementById('location').value.trim();
+
+        if (!title || !description || !location) {
+            showError('Please fill in all fields.');
+            return;
+        }
+        if (!selectedCategory) {
+            showError('Please select a category.');
+            return;
+        }
+        if (!selectedPriority) {
+            showError('Please select a priority.');
+            return;
+        }
+
+        const btn = document.querySelector('.submit-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        btn.disabled = true;
+
+        const result = await submitComplaint({
+            residentId: String(user.userId),
+            title, description,
+            category: selectedCategory,
+            priority: selectedPriority,
+            location
+        });
+
+        if (result.error) {
+            showError(result.error);
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Complaint';
+            btn.disabled = false;
+            return;
+        }
+
+        showSuccess('Complaint submitted successfully! Redirecting...');
+        setTimeout(() => {
+            window.location.href = 'my-complaints.html';
+        }, 2000);
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('errorAlert');
+        el.textContent = msg; el.style.display = 'block';
+        document.getElementById('successAlert').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+        const el = document.getElementById('successAlert');
+        el.textContent = msg; el.style.display = 'block';
+        document.getElementById('errorAlert').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

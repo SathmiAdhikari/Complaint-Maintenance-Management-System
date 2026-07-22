@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Workers — CMMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:#f8f9fb; }
+
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0;
+            width: 260px; height: 100vh;
+            background: linear-gradient(180deg, #112D4E 0%, #1a4a7a 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-brand h2 { font-size: 22px; font-weight: 700; }
+        .sidebar-brand h2 span { color: #be1744; }
+        .sidebar-brand p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+
+        .sidebar-user {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .user-avatar {
+            width: 42px; height: 42px;
+            background: #be1744; border-radius: 50%;
+            display: flex; align-items: center;
+            justify-content: center;
+            font-size: 18px; font-weight: 700;
+        }
+
+        .user-info h4 { font-size: 13px; font-weight: 600; }
+        .user-info p { font-size: 11px; color: rgba(255,255,255,0.6); }
+
+        .sidebar-nav { flex: 1; padding: 20px 0; }
+
+        .nav-label {
+            font-size: 10px; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
+            padding: 0 20px; margin-bottom: 8px;
+            margin-top: 15px; text-transform: uppercase;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.75);
+            text-decoration: none; font-size: 14px; transition: 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(190,23,68,0.2);
+            color: white; border-left: 3px solid #be1744;
+        }
+
+        .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logout-btn {
+            display: flex; align-items: center; gap: 10px;
+            color: rgba(255,255,255,0.75);
+            cursor: pointer; font-size: 14px;
+            background: none; border: none;
+            font-family: 'Poppins', sans-serif;
+            transition: 0.3s; width: 100%;
+        }
+        .logout-btn:hover { color: #be1744; }
+
+        .main-content { margin-left: 260px; min-height: 100vh; }
+
+        .topbar {
+            background: white; padding: 18px 30px;
+            display: flex; justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .topbar h1 { font-size: 20px; color: #112D4E; font-weight: 600; }
+        .topbar p { font-size: 13px; color: #777; }
+
+        .page-body { padding: 30px; }
+
+        /* Tabs */
+        .tabs {
+            display: flex; gap: 5px;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            border: none; border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: 0.3s;
+            color: #777; background: none;
+        }
+
+        .tab-btn.active {
+            background: #be1744;
+            color: white;
+        }
+
+        /* Stats */
+        .mini-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px; margin-bottom: 20px;
+        }
+
+        .mini-stat {
+            background: white; border-radius: 10px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 15px;
+        }
+
+        .mini-stat-icon {
+            width: 45px; height: 45px; border-radius: 10px;
+            display: flex; align-items: center;
+            justify-content: center; font-size: 18px;
+        }
+
+        .mini-stat-icon.blue   { background:#e3f2fd; color:#1565c0; }
+        .mini-stat-icon.green  { background:#e8f5e9; color:#2e7d32; }
+        .mini-stat-icon.orange { background:#fff3e0; color:#e65100; }
+
+        .mini-stat h3 { font-size: 22px; font-weight: 700; color: #112D4E; }
+        .mini-stat p  { font-size: 12px; color: #777; }
+
+        /* Cards Grid */
+        .workers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .worker-card {
+            background: white; border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: 0.3s;
+        }
+
+        .worker-card:hover { transform: translateY(-3px); }
+
+        .worker-card-header {
+            display: flex; align-items: center;
+            gap: 15px; margin-bottom: 15px;
+        }
+
+        .worker-avatar-lg {
+            width: 55px; height: 55px;
+            background: linear-gradient(135deg, #112D4E, #be1744);
+            border-radius: 50%;
+            display: flex; align-items: center;
+            justify-content: center;
+            color: white; font-weight: 700;
+            font-size: 20px; flex-shrink: 0;
+        }
+
+        .worker-card-info h4 {
+            font-size: 15px; color: #112D4E; font-weight: 600;
+        }
+
+        .worker-card-info p {
+            font-size: 12px; color: #777;
+        }
+
+        .worker-card-body {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-bottom: 15px;
+        }
+
+        .info-item { }
+        .info-item label {
+            font-size: 10px; color: #999;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: block; margin-bottom: 2px;
+        }
+        .info-item span { font-size: 13px; color: #333; font-weight: 500; }
+
+        .stars { color: #E8A838; font-size: 13px; }
+
+        .worker-card-footer {
+            display: flex; gap: 8px;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 15px;
+        }
+
+        .btn-approve {
+            flex: 1; padding: 8px;
+            background: #e8f5e9; color: #2e7d32;
+            border: none; border-radius: 7px;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: 'Poppins', sans-serif;
+            transition: 0.3s;
+        }
+        .btn-approve:hover { background: #2e7d32; color: white; }
+
+        .btn-reject {
+            flex: 1; padding: 8px;
+            background: #ffebee; color: #be1744;
+            border: none; border-radius: 7px;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: 'Poppins', sans-serif;
+            transition: 0.3s;
+        }
+        .btn-reject:hover { background: #be1744; color: white; }
+
+        .btn-deactivate {
+            flex: 1; padding: 8px;
+            background: #f5f5f5; color: #555;
+            border: none; border-radius: 7px;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: 'Poppins', sans-serif;
+            transition: 0.3s;
+        }
+        .btn-deactivate:hover { background: #555; color: white; }
+
+        .badge {
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+        .badge-pending  { background:#fff8e1; color:#f57f17; }
+        .badge-approved { background:#e8f5e9; color:#2e7d32; }
+        .badge-rejected { background:#ffebee; color:#be1744; }
+
+        .empty-state {
+            text-align: center; padding: 60px; color: #999;
+            grid-column: 1/-1;
+        }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; display: block; }
+        .empty-state p { font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h2>CM<span>MS</span></h2>
+        <p>Complaint & Maintenance System</p>
+    </div>
+    <div class="sidebar-user">
+        <div class="user-avatar" id="avatarLetter">A</div>
+        <div class="user-info">
+            <h4 id="userName">Admin</h4>
+            <p>Administrator</p>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main Menu</div>
+        <a class="nav-item" href="admin-dashboard.html">
+            <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <a class="nav-item" href="manage-complaints.html">
+            <i class="fas fa-clipboard-list"></i> Complaints
+        </a>
+        <a class="nav-item active" href="manage-workers.html">
+            <i class="fas fa-hard-hat"></i> Workers
+        </a>
+        <a class="nav-item" href="manage-residents.html">
+            <i class="fas fa-users"></i> Residents
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h1>Manage Workers</h1>
+            <p>Approve, reject and manage maintenance workers</p>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+        <!-- Stats -->
+        <div class="mini-stats">
+            <div class="mini-stat">
+                <div class="mini-stat-icon blue">
+                    <i class="fas fa-hard-hat"></i>
+                </div>
+                <div>
+                    <h3 id="totalWorkers">0</h3>
+                    <p>Total Workers</p>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h3 id="approvedWorkers">0</h3>
+                    <p>Approved</p>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-stat-icon orange">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <h3 id="pendingWorkers">0</h3>
+                    <p>Pending Approval</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('all')">
+                All Workers
+            </button>
+            <button class="tab-btn" onclick="showTab('pending')">
+                Pending
+            </button>
+            <button class="tab-btn" onclick="showTab('approved')">
+                Approved
+            </button>
+            <button class="tab-btn" onclick="showTab('rejected')">
+                Rejected
+            </button>
+        </div>
+
+        <!-- Workers Grid -->
+        <div class="workers-grid" id="workersGrid">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading workers...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+    const user = checkRole('ADMIN');
+    document.getElementById('userName').textContent = user.fullName;
+    document.getElementById('avatarLetter').textContent =
+        user.fullName.charAt(0).toUpperCase();
+
+    let allWorkers = [];
+    let currentTab = 'all';
+
+    async function loadWorkers() {
+        try {
+            const response = await fetch(
+                'http://localhost:8080/api/workers/all');
+            allWorkers = await response.json();
+
+            document.getElementById('totalWorkers').textContent =
+                allWorkers.length;
+            document.getElementById('approvedWorkers').textContent =
+                allWorkers.filter(w => w.approvalStatus === 'APPROVED').length;
+            document.getElementById('pendingWorkers').textContent =
+                allWorkers.filter(w => w.approvalStatus === 'PENDING').length;
+
+            renderWorkers(allWorkers);
+        } catch (err) {
+            document.getElementById('workersGrid').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Error loading workers</p>
+                </div>`;
+        }
+    }
+
+    function renderWorkers(workers) {
+        const grid = document.getElementById('workersGrid');
+
+        if (workers.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-hard-hat"></i>
+                    <p>No workers found</p>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = workers.map(w => `
+            <div class="worker-card">
+                <div class="worker-card-header">
+                    <div class="worker-avatar-lg">
+                        ${(w.fullName || '?').charAt(0)}
+                    </div>
+                    <div class="worker-card-info">
+                        <h4>${w.fullName || 'Unknown'}</h4>
+                        <p>${w.email || '-'}</p>
+                        <span class="badge badge-${(w.approvalStatus || 'pending').toLowerCase()}">
+                            ${w.approvalStatus || 'PENDING'}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="worker-card-body">
+                    <div class="info-item">
+                        <label>Trade</label>
+                        <span>${w.trade || '-'}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Experience</label>
+                        <span>${w.experienceYears || 0} years</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone</label>
+                        <span>${w.phoneNumber || '-'}</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Rating</label>
+                        <span class="stars">
+                            ${'★'.repeat(Math.round(w.averageRating || 0))}
+                            ${'☆'.repeat(5 - Math.round(w.averageRating || 0))}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="worker-card-footer">
+                    ${w.approvalStatus === 'PENDING' ? `
+                        <button class="btn-approve"
+                            onclick="approveWorker(${w.userId})">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="btn-reject"
+                            onclick="rejectWorker(${w.userId})">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    ` : `
+                        <button class="btn-deactivate"
+                            onclick="alert('Feature coming soon')">
+                            <i class="fas fa-ban"></i> Deactivate
+                        </button>
+                    `}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function showTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        if (tab === 'all') {
+            renderWorkers(allWorkers);
+        } else {
+            renderWorkers(allWorkers.filter(
+                w => w.approvalStatus === tab.toUpperCase()
+            ));
+        }
+    }
+
+    async function approveWorker(workerId) {
+        if (!confirm('Approve this worker?')) return;
+        try {
+            await fetch(
+                `http://localhost:8080/api/admin/workers/${workerId}/approve`,
+                { method: 'PATCH' }
+            );
+            alert('Worker approved successfully!');
+            loadWorkers();
+        } catch (err) {
+            alert('Error approving worker.');
+        }
+    }
+
+    async function rejectWorker(workerId) {
+        if (!confirm('Reject this worker?')) return;
+        try {
+            await fetch(
+                `http://localhost:8080/api/admin/workers/${workerId}/reject`,
+                { method: 'PATCH' }
+            );
+            alert('Worker rejected.');
+            loadWorkers();
+        } catch (err) {
+            alert('Error rejecting worker.');
+        }
+    }
+
+    loadWorkers();
+</script>
+
+</body>
+</html>
