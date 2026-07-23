@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8080/api";
+const API_URL = 'http://10.33.9.243:8080/api';
 
 /* ==========================================================
    COMMON REQUEST FUNCTION
